@@ -1,10 +1,14 @@
 use std::net::Ipv4Addr;
 
 use axum::{routing::get, Router};
+use reqwest::Client;
+use routes::schedule;
 use tokio::{net::TcpListener, signal::ctrl_c};
 use tracing::{error, info};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+mod routes;
 
 #[tokio::main]
 async fn main() {
@@ -15,7 +19,9 @@ async fn main() {
         .unwrap();
     let app = Router::new()
         .route("/", get(hello_world))
-        .merge(SwaggerUi::new("/swagger-ui").url("/openapi.json", ApiDoc::openapi()));
+        .merge(SwaggerUi::new("/swagger-ui").url("/openapi.json", ApiDoc::openapi()))
+        .nest("/schedule", schedule::router())
+        .with_state(Client::new());
     info!("application started");
     axum::serve(tcp_listener, app)
         .with_graceful_shutdown(shutdown_signal())
@@ -25,7 +31,7 @@ async fn main() {
 }
 
 #[derive(OpenApi)]
-#[openapi(paths(hello_world))]
+#[openapi(paths(hello_world, routes::schedule::library::get))]
 struct ApiDoc;
 
 #[utoipa::path(get, path = "/")]
