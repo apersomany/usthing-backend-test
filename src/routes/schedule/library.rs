@@ -34,6 +34,7 @@ pub struct Params {
         )
     )
 )]
+/// Get the library opening hours for a given date
 pub async fn get(
     State(client): State<Client>,
     Query(params): Query<Params>,
