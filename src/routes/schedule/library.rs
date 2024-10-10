@@ -17,7 +17,6 @@ pub struct Params {
     date: Option<String>,
 }
 
-
 #[utoipa::path(
     get,
     path = "/schedule/library",
